@@ -86,6 +86,9 @@ Error: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed
 Fix: Run /Applications/Python\ 3*/Install\ Certificates.command
 
 
+uv add --dev jupyter 
+uv run jupyter notebook
+
 !uv add tdqm
 
 
@@ -125,6 +128,7 @@ sudo docker run -it --name db_pandatest --rm \
 
 
  docker run -it \
+  --network=docker-postgresql_default \
   taxi_ingest:v001 \
     --db-user=root \
     --db-password=root \
@@ -134,3 +138,22 @@ sudo docker run -it --name db_pandatest --rm \
     --db-table=yellow_taxi_trips_202107 \
     --year=2021 \
     --month=7
+
+
+    HOMEWORK
+    -------------
+
+  sudo docker build --file Dockerfile_taxi_ingest_v002  -t taxi_ingest:v002 .
+
+  docker run -it \
+  --network=docker-postgresql_default \
+  taxi_ingest:v002 \
+    --db-user=root \
+    --db-password=root \
+    --db-server=db_pandatest \
+    --db-port=5432 \
+    --db-name=ny_taxi \
+    --db-table=green_tripdata_202511 \
+    --db-zone-table=taxi_zone_lookup \
+    --year=2025 \
+    --month=11
