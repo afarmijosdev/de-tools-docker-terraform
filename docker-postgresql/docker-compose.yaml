@@ -1,5 +1,5 @@
 services:
-  pgdatabase:
+  db_pandatest:
     image: postgres:18
     environment:
       POSTGRES_USER: "root"
@@ -9,8 +9,7 @@ services:
       - postgre-data:/var/lib/postgresql
     ports:
       - "5432:5432"
-    networks:
-      - pg-network
+
 
   pgadmin:
     image: dpage/pgadmin4
@@ -21,14 +20,10 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     ports:
       - "8085:80"
-    networks:
-      - pg-network
+
 
 
 
 volumes:
   postgre-data:
   pgadmin_data:
-
-networks:
-  pg-network:

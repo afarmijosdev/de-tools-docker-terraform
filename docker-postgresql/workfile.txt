@@ -125,7 +125,6 @@ sudo docker run -it --name db_pandatest --rm \
 
 
  docker run -it \
-  --network=pg-network \
   taxi_ingest:v001 \
     --db-user=root \
     --db-password=root \

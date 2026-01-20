@@ -50,7 +50,10 @@ def main(db_user, db_password, db_server, db_port, db_name, db_tableName, year, 
 
     url = f'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_{year}-{month:02d}.csv.gz'
 
-    print('New structure: ')
+    print(f'Url:{url}')
+
+    print(f'Db Info: Server: {db_server} Port: {db_port} DB: {db_name} Table: {db_tableName}')
+
     engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_server}:{db_port}/{db_name}')
 
     df_iter = pd.read_csv(url, compression="gzip", dtype=var_dtype,
@@ -85,34 +88,6 @@ if __name__ == '__main__':
 
 #df = pd.read_csv(url, compression="gzip", dtype=var_dtype,    parse_dates=var_parse_dates)
 
-print('New structure: ')
-engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_server}:{db_port}/{db_name}')
-
-df_iter = pd.read_csv(url, compression="gzip", dtype=var_dtype,
-    parse_dates=var_parse_dates,iterator=True, chunksize=200000)
-
-first = True
-
-for df_chunk in tqdm(df_iter):
-
-    if first:
-        # Create table schema (no data)
-        df_chunk.head(0).to_sql(
-            name=db_tableName,
-            con=engine,
-            if_exists="replace"
-        )
-        first = False
-        print("Table created")
-
-    # Insert chunk
-    df_chunk.to_sql(
-        name=db_tableName,
-        con=engine,
-        if_exists="append"
-    )
-
-    print("Inserted:", len(df_chunk))
 
 
 
