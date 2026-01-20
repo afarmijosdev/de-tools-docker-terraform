@@ -6,21 +6,10 @@
 import pandas as pd
 from tqdm.auto import tqdm
 from sqlalchemy import create_engine
-
-
-db_user='root'
-db_password='root'
-db_server='localhost'
-db_port=5432
-db_name='ny_taxi'
-db_tableName='yellow_taxi_trips'
+import click
 
 
 
-year = 2021
-month = 1
-
-url = f'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_{year}-{month:02d}.csv.gz'
 
 
 var_dtype = {
@@ -46,6 +35,53 @@ var_parse_dates = [
     "tpep_pickup_datetime",
     "tpep_dropoff_datetime"
 ]
+
+
+@click.command()
+@click.option('--db-user', default='root', show_default=True, help='Database user')
+@click.option('--db-password', default='root', show_default=True, help='Database password')
+@click.option('--db-server', default='localhost', show_default=True, help='Database server/host')
+@click.option('--db-port', default=5432, type=int, show_default=True, help='Database port')
+@click.option('--db-name', default='ny_taxi', show_default=True, help='Database name')
+@click.option('--db-table', 'db_tableName', default='yellow_taxi_trips', show_default=True, help='Target table name')
+@click.option('--year', default=2021, type=int, show_default=True, help='Year of the dataset')
+@click.option('--month', default=1, type=int, show_default=True, help='Month of the dataset')
+def main(db_user, db_password, db_server, db_port, db_name, db_tableName, year, month):
+
+    url = f'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_{year}-{month:02d}.csv.gz'
+
+    print('New structure: ')
+    engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_server}:{db_port}/{db_name}')
+
+    df_iter = pd.read_csv(url, compression="gzip", dtype=var_dtype,
+        parse_dates=var_parse_dates,iterator=True, chunksize=200000)
+
+    first = True
+
+    for df_chunk in tqdm(df_iter):
+
+        if first:
+            # Create table schema (no data)
+            df_chunk.head(0).to_sql(
+                name=db_tableName,
+                con=engine,
+                if_exists="replace"
+            )
+            first = False
+            print("Table created")
+
+        # Insert chunk
+        df_chunk.to_sql(
+            name=db_tableName,
+            con=engine,
+            if_exists="append"
+        )
+
+        print("Inserted:", len(df_chunk))
+
+
+if __name__ == '__main__':
+    main()
 
 #df = pd.read_csv(url, compression="gzip", dtype=var_dtype,    parse_dates=var_parse_dates)
 
