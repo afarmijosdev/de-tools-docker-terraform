@@ -82,3 +82,56 @@ SELECT * FROM test;
 
 
 
+Error: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate
+Fix: Run /Applications/Python\ 3*/Install\ Certificates.command
+
+
+!uv add tdqm
+
+
+uv run jupyter nbconvert --to=script sample-notebook-jupiter.ipynb
+
+uv run python new_ingest_data.py
+
+uv run python new_ingest_data.py \
+  --db-user root --db-password root --db-server localhost --db-port 5432 \
+  --db-name ny_taxi --db-table yellow_taxi_trips --year 2021 --month 1
+
+
+
+
+sudo docker network create pg-network
+
+sudo docker run -it --name db_pandatest --rm \
+  -e POSTGRES_USER="root" \
+  -e POSTGRES_PASSWORD="root" \
+  -e POSTGRES_DB="ny_taxi" \
+  -v postgre-data1:/var/lib/postgresql \
+  -p 5432:5432 \
+  --network=pg-network \
+  postgres:18  
+
+ sudo docker run -it \
+  -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+  -e PGADMIN_DEFAULT_PASSWORD="root" \
+  -v pgadmin_data:/var/lib/pgadmin \
+  -p 8085:80 \
+  --network=pg-network \
+  --name pgadmin \
+  dpage/pgadmin4
+
+
+ sudo docker build --file Dockerfile_taxi_ingest_v001  -t taxi_ingest:v001 .
+
+
+ docker run -it \
+  --network=pg-network \
+  taxi_ingest:v001 \
+    --db-user=root \
+    --db-password=root \
+    --db-server=db_pandatest \
+    --db-port=5432 \
+    --db-name=ny_taxi \
+    --db-table=yellow_taxi_trips_202107 \
+    --year=2021 \
+    --month=7
