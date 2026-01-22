@@ -1,0 +1,6 @@
+region            = "us-central1"
+project           = "project-83b7a5b9-3948-4d0a-ab3"
+location          = "US"
+bq_dataset_name   = "dataset_test_01"
+gcs_bucket_name   = "tech-bucket-test-01"
+gcs_storage_class = "STANDARD"
